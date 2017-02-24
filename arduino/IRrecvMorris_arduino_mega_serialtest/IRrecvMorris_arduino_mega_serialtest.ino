@@ -145,8 +145,13 @@ void loop() {
   if (stringComplete) {
 
     inputString.trim();
-    if(inputString != "4294967295")
+
+    uint32_t value = inputString.toInt();
+    
+    if(inputString != "4294967295"){
       Serial.println(inputString);
+      handle(value);
+    }
     
     // clear the string:
     //if(inputString=="553617527")
@@ -216,152 +221,68 @@ void movement()
 void toggleState(int idx)
 {
 
-  states[idx] = states[idx] == HIGH ? LOW : HIGH;
-  EEPROM.update(idx, states[idx]);
- // digitalWrite(ports[idx], states[idx]);
-  Tlc.set(idx, states[idx] == HIGH ? 4095 : 0);
-  Tlc.update();delay(75);
+  if(idx < 12)
+  {
+      states[idx] = states[idx] == HIGH ? LOW : HIGH;
+      EEPROM.update(idx, states[idx]);
+      Tlc.set(idx, states[idx] == HIGH ? 4095 : 0);
+      Tlc.update();delay(75);
+  }
 
-  //Serial.print(idx);
-  Serial.println("toggleState");
+  Serial.print("toggleState:");  Serial.println(idx);
 }
 
-void handle(int recv)
-{
-     
+void handle(uint32_t recv)
+{     
      switch(recv)
      {
-        case -30601:// 1
-          Serial.println("1");
-           toggleState(0);
-          break;
-        case 18615://2
-        Serial.println("2");
-         toggleState(1);
-        break;
-        case -14281://3
-        Serial.println("3");
-         toggleState(2);
-        break;
-        case 10455://4
-        Serial.println("4");
-         toggleState(3);
-        break;
-        case -22441://5
-        Serial.println("5");
-         toggleState(4);
-        break;
-        case 26775://6
-        Serial.println("6");
-         toggleState(5);
-        break;
-        case -6121://7
-        Serial.println("7");
-         toggleState(6);
-        break;
-        case 6375://8
-        Serial.println("8");
-         toggleState(7);
-        break;
-        case -26521://9
-        Serial.println("9");
-         toggleState(8);
-        break;
-        case 30855://refresh
-        Serial.println("refresh");
-         toggleState(9);
-        break;
-        case 2295://0
-        Serial.println("0");
-         toggleState(10);
-        break;
-        case -28561:// fav
-        Serial.println("favoriet");
-         toggleState(11);
-              break;               
-        case 22695:
-          Serial.println("menu");
-        break;
-        case 14535:
-         Serial.println("Exit");
-        break;
-        case -10201:
-        Serial.println("Epg");
-        break;
-        case -18361:
-        Serial.println("Info");
-         printMem();
-        break;        
-        case -2041:
-        Serial.println("OK");
-          moveMent = 0;       
-        break;
-        case 255:
-        Serial.println("UP");
-            incrementMovement();
-        break;
-        case 16575:
-        Serial.println("RIGHT");
-        break;
-        case -32641:
-        Serial.println("DOWN");
-        break;
-        case -16321:
-        Serial.println("LEFT");
-        break;
-        case -5611:
-        Serial.println("VOL UP");
-        decrementSpeed();
-        break;
-        case 6885:
-        Serial.println("VOL DOWN");
-        incrementSpeed();
-        
-        break;
-        case 8415:
-        Serial.println("music");
-        break;
-        case 31365:
-        Serial.println("sat");
-        break;
-        case -21931:
-        Serial.println("Pup");
-              decrementSpeed();
-        break;
-        case 27285:
-        Serial.println("Pdown");
-         incrementSpeed();
- 
-        break;
-        case 20655:
-           Serial.println("Power");
-           if(powerToggle == LOW)
-           {
-                powerToggle = HIGH;
-                for(int i = 0;i< 12;i++){
-                   // states[i] = LOW;
-                   moveMent = 0;
-                   currentSpeed = speedMin;
-                   Tlc.clear();
-                }     
-                Tlc.update();     delay(75);        
-           }
-           else
-           {
-              readStates();
-              
-           }
-          // allOn();
-        break;        
-        case 12495:
-           Serial.println("no speaker");
-           allOn();
-        break;
+        case  553617527:  toggleState(0);break; //  1 
+        case  553601207:  toggleState(1);break; //  2
+        case  553633847:  toggleState(2);break; //  3
+        case  553593047:  toggleState(3);break; //  4
+        case  553625687:  toggleState(4);break; //  5
+        case  553609367:  toggleState(5);break; //  6
+        case  553642007:  toggleState(6);break; //  7
+        case  553588967:  toggleState(7);break; //  8 
+        case  553621607:  toggleState(8);break; //  9
+        case  553613447:  toggleState(9);break; //  refresh
+        case  553584887:  toggleState(10);break; // 0
+        case  553619567:  toggleState(11);break; // FAV
+        case  553605287:  toggleState(12);break; // menu
+        case  553597127:  toggleState(13);break; // exit
+        case  553637927:  toggleState(14);break; // epg
+        case  553629767:  toggleState(15);break; // i
+        case  553582847:  toggleState(16);break; // navUP
+        case  553599167:  toggleState(17);break; // navRight
+        case  553615487:  toggleState(18);break; // navDown
+        case  553631807:  toggleState(19);break; // nacLeft
+        case  553646087:  toggleState(20);break; // navOK
+        case  553642517:  toggleState(21);break; // V+
+        case  553589477:  toggleState(22);break; // V-
+        case  553591007:  toggleState(23);break; // tel/muz
+        case  553613957:  toggleState(24);break; // sat
+        case  553626197:  toggleState(25);break; // P+
+        case  553609877:  toggleState(26);break; // P-
+        case  553635887:  toggleState(27);break; // F1
+        case  553627727:  toggleState(28);break; // F2
+        case  553611407:  toggleState(29);break; // F3
+        case  553644047:  toggleState(30);break; // F4
+        case  553623647:  toggleState(31);break; // vol?
+        case  553639967:  toggleState(32);break; // align_bottom
+        case  553640477:  toggleState(33);break; // text
+        case  553607327:  toggleState(34);break; // pauze
+        case  553632317:  toggleState(35);break; // UHF
+        case  553586927:  toggleState(36);break; // sat
+        case  553583357:  toggleState(37);break; // M1
+        case  553599677:  toggleState(38);break; // N/P
+        case  553591517:  toggleState(39);break; // Timer
+        case  553603247:  toggleState(40);break; // POWER
+        case  553595087:  toggleState(41);break; // Mute
         default:
-          if(recv != -1)
             Serial.println(recv);   
 
          }
-     }
+         
+}
 
 

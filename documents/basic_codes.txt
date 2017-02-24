@@ -1,0 +1,7 @@
+
+Handeling the commands and what to do?
+
+command 0-11 are the ledlights toggle ON/OFF
+
+command 40:	power button : ON (read eeprom values en reset to saved state) - OFF (all leds are turned off state is not saved)
+

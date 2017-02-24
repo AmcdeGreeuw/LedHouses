@@ -1,43 +1,43 @@
-553617527	1
-553601207	2
-553633847	3
-553593047	4
-553625687	5
-553609367	6
-553642007	7
-553588967	8	
-553621607	9
-553613447	refresh
-553584887	0
-553619567	FAV
-553605287	menu
-553597127	exit
-553637927	epg
-553629767	i
-553582847	navUP
-553599167	navRight
-553615487	navDown
-553631807	nacLeft
-553646087	navOK
-553642517	V+
-553589477	V-
-553591007	tel/muz
-553613957	sat
-553626197	P+
-553609877	P-
-553635887	F1
-553627727	F2
-553611407	F3
-553644047	F4
-553623647	vol?
-553639967	align_bottom
-553640477	text
-553607327	pauze
-553632317	UHF
-553586927	sat
-553583357	M1
-553599677	N/P
-553591517	Timer
-553603247	POWER
-553595087	Mute
+case	"553617527":	toggleState(0);break; //	1	break;
+case	"553601207":	toggleState(1);break; //	2
+case	"553633847":	toggleState(2);break; //	3
+case	"553593047":	toggleState(3);break; //	4
+case	"553625687":	toggleState(4);break; //	5
+case	"553609367":	toggleState(5);break; //	6
+case	"553642007":	toggleState(6);break; //	7
+case	"553588967":	toggleState(7);break; //	8	
+case	"553621607":	toggleState(8);break; //	9
+case 	"553613447":	toggelState(9);break; //	refresh
+case	"553584887":	toggleState(10);break; //	0
+case	"553619567":	toggleState(11);break; //	FAV
+case	"553605287":	toggleState(12);break; //	menu
+case	"553597127":	toggleState(13);break; //	exit
+case	"553637927":	toggleState(14);break; //	epg
+case	"553629767":	toggleState(15);break; //	i
+case	"553582847":	toggleState(16);break; //	navUP
+case	"553599167":	toggleState(17);break; //	navRight
+case	"553615487":	toggleState(18);break; //	navDown
+case	"553631807":	toggleState(19);break; //	nacLeft
+case	"553646087":	toggleState(20);break; //	navOK
+case	"553642517":	toggleState(21);break; //	V+
+case	"553589477":	toggleState(22);break; //	V-
+case	"553591007":	toggleState(23);break; //	tel/muz
+case	"553613957":	toggleState(24);break; //	sat
+case	"553626197":	toggleState(25);break; //	P+
+case	"553609877":	toggleState(26);break; //	P-
+case	"553635887":	toggleState(27);break; //	F1
+case	"553627727":	toggleState(28);break; //	F2
+case	"553611407":	toggleState(29);break; //	F3
+case	"553644047":	toggleState(30);break; //	F4
+case	"553623647":	toggleState(31);break; //	vol?
+case	"553639967":	toggleState(32);break; //	align_bottom
+case	"553640477":	toggleState(33);break; //	text
+case	"553607327":	toggleState(34);break; //	pauze
+case	"553632317":	toggleState(35);break; //	UHF
+case	"553586927":	toggleState(36);break; //	sat
+case	"553583357":	toggleState(37);break; //	M1
+case	"553599677":	toggleState(38);break; //	N/P
+case	"553591517":	toggleState(39);break; //	Timer
+case	"553603247":	toggleState(40);break; //	POWER
+case	"553595087":	toggleState(41);break; //	Mute
 
