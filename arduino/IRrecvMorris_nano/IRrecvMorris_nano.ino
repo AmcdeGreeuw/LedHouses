@@ -28,8 +28,11 @@ void setup()
    Tlc.clear(); Tlc.update();delay(75);
 
   Serial.begin(9600);
+  startTest();
+  
   readStates();
 
+//defaults
   if(currentSpeed == 0 || currentSpeed == 255){
     currentSpeed = speedMin;
     writeSpeed();
@@ -39,9 +42,33 @@ void setup()
     moveMent = 0; 
     writemoveMent();
   }
-  
+ // end defaults
   
  
+}
+void startTest(){
+
+  allOn(1000);
+  delay(500);
+  allOn(2000);
+  delay(500);
+  allOn(3000);
+  delay(500);
+  allOn(4095);
+  delay(500);
+  clearLeds();
+}
+void allOn(int v)
+{
+  for(int i=0;i<16;i++){
+      Tlc.set(i, v);     
+  }
+   Tlc.update();delay(75);
+
+}
+void clearLeds()
+{
+   Tlc.clear(); Tlc.update();delay(75);
 }
 void writeStates()
 {
