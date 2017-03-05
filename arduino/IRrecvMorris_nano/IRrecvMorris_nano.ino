@@ -9,23 +9,33 @@
 #include "Tlc5940.h"
 
 int addr = 0;
-int speedMin = 5;//00
+int speedMin = 1;//00
 int speedStep = 5;
-int speedMax = 100;
+int speedMax = 255;
+byte maxluminous = 256;
 int currentSpeed = 0;
 int portIndex = 0;
 int moveMent = 0;// none = 0, left to right = 1, right to left= 2, pattern = 3
 byte powerToggle = LOW;
+byte luminous = 4; // off 
+int currentLuminous = 2048;  //50%
+byte const speedaddress = 16;
+byte const luminousaddress = 18;
+byte const movementaddress = 17;
+uint32_t lastvalue = 0;
+boolean binit = true;
+byte repeat = 0;
+byte repeatmax = 2;
 
-byte states[] = { LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW };
+byte states[] = { LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW,LOW };
 String  inputString = "";         // a string to hold incoming data
 boolean stringComplete = false;  // whether the string is complete
 
 void setup()
 {
 
-    Tlc.init();
-   Tlc.clear(); Tlc.update();delay(75);
+  Tlc.init();
+  Tlc.clear(); Tlc.update();delay(75);
 
   Serial.begin(9600);
   startTest();
@@ -38,25 +48,154 @@ void setup()
     writeSpeed();
   }
 
-  if(moveMent > 3 || moveMent == 255){
+  if(moveMent > 4 || moveMent == 255){
     moveMent = 0; 
     writemoveMent();
   }
  // end defaults
-  
- 
+ binit = false; 
 }
+
+
+
+void loop() {
+
+  serialEvent(); //call the function
+  // print the string when a newline arrives:
+  if (stringComplete) {
+
+    inputString.trim();
+
+    uint32_t value = inputString.toInt();
+    
+    if(inputString != "4294967295"){
+       repeat = 0;
+     // Serial.println(inputString);
+      lastvalue = value;
+      handle(value);
+    }
+    else
+    {
+      repeat++;
+      if(repeat==repeatmax)
+      {
+         repeat = 0;
+         handle(lastvalue);
+      }
+      
+    }
+          
+    inputString = "";
+    stringComplete = false;
+  }
+  movement();
+}
+
+void writeStates()
+{
+  for(int i=0;i<16;i++)
+  {
+    EEPROM.update(i, states[i]);
+    delay(50);
+  }
+
+   EEPROM.update(speedaddress, currentSpeed);
+   delay(50);
+
+   EEPROM.update(movementaddress, moveMent); 
+   delay(50);
+
+   EEPROM.update(luminousaddress, luminous); 
+   delay(50);
+   
+}
+void readStates()
+{
+ for(int i=0;i<16;i++)
+  {
+     states[i] = EEPROM.read(i);
+     states[i] == 255 ? HIGH : LOW;
+    delay(50);
+  }
+
+   currentSpeed = EEPROM.read(speedaddress);
+   delay(50);
+   
+   moveMent = EEPROM.read(movementaddress); 
+   delay(50);
+
+   luminous = EEPROM.read(luminousaddress); 
+   delay(50);
+   
+   setLuminous();
+   powerToggle = LOW;
+}
+
+void setLuminous()
+{
+   currentLuminous = (luminous * 16) -1;
+        for(int i = 0;i< 16;i++){
+          if(states[i] == HIGH)
+            Tlc.set(i, currentLuminous);
+          else
+            Tlc.set(i, 0);
+      }  
+      Tlc.update();delay(75);
+}
+void powerBlink(){
+
+  if(binit) return;
+  allOn(4095);
+  delay(200);
+  clearLeds();
+  delay(200);
+  allOn(4095);
+  delay(200);
+  clearLeds();
+  delay(200);
+ readStates();
+  
+}
+
+
 void startTest(){
 
-  allOn(1000);
-  delay(500);
-  allOn(2000);
-  delay(500);
-  allOn(3000);
-  delay(500);
+  allOn(1095);
+  return;
   allOn(4095);
-  delay(500);
+  delay(1000);
+    allOn(3095);
+  delay(1000);
+    allOn(2095);
+  delay(1000);
+    allOn(1095);
+  delay(1000);
+    allOn(595);
+  delay(1000);
+    allOn(4095);
+  delay(1000);
+    allOn(4095);
+  delay(1000);
+    allOn(4095);
+  delay(1000);
   clearLeds();
+}
+
+void toggleAllOn()
+{
+    int counthigh = 0;
+    // check what dominates 
+    for(int i=0;i<16;i++)
+    {
+      if(states[i]==HIGH)
+        counthigh++;
+    }
+
+    if(counthigh > 8)
+      allOn();
+     else
+      allOff();
+     
 }
 void allOn(int v)
 {
@@ -70,37 +209,20 @@ void clearLeds()
 {
    Tlc.clear(); Tlc.update();delay(75);
 }
-void writeStates()
+void togglePower()
 {
-  for(int i=0;i<12;i++)
-  {
-    EEPROM.update(i, states[i]);
-    delay(100);
-  }
-  // speed
-   EEPROM.update(12, currentSpeed);
-   delay(100);
-  // moment
-   EEPROM.update(13, moveMent); 
-   delay(100);
-   
+    powerToggle = powerToggle == LOW ? HIGH : LOW;
+    if(powerToggle==HIGH)
+    {
+      moveMent = 0;
+      clearLeds();
+    }
+    else
+    {
+      readStates();
+    } 
 }
-void readStates()
-{
- for(int i=0;i<12;i++)
-  {
-     states[i] = EEPROM.read(i);
-     states[i] == 255 ? HIGH : LOW;
-    delay(100);
-  }
-  // speed
-   currentSpeed = EEPROM.read(12);
-   delay(100);
-  // moment
-   moveMent = EEPROM.read(13); 
-   delay(100);
-   powerToggle = LOW;
-}
+
 /*
 void printMem()
 {
@@ -118,79 +240,89 @@ void printMem()
 */
 void allOn()
 {
-      for(int i = 0;i< 12;i++){
+      for(int i = 0;i< 16;i++){
           states[i] = HIGH;
-          //digitalWrite(ports[i], states[i]);
-          Tlc.set(i, 4095);
+          Tlc.set(i, currentLuminous);
       }  
       Tlc.update();delay(75);
-      moveMent = 0;
       writeStates();
 }
 void allOff()
 {
-      for(int i = 0;i< 12;i++){
+      for(int i = 0;i< 16;i++){
           states[i] = LOW;
-         // digitalWrite(ports[i], states[i]);
           Tlc.set(i, 0);
       }  
       Tlc.update();delay(75);
        writeStates();
 }
-void restSpeed()
+void resetSpeed()
 {
     currentSpeed = speedMin;
 }
 void incrementSpeed(){
 
-    if(currentSpeed < speedMax)
-      currentSpeed += speedStep;
+    currentSpeed -= speedStep;
+    if(currentSpeed < 0)
+    {
+      currentSpeed = speedMin;
+    }
 
     writeSpeed();
-    Serial.write("speed:");
-    Serial.println(currentSpeed, DEC);
+    movement();
+   // Serial.write("speed:");
+   // Serial.println(currentSpeed, DEC);
 }
+
 void decrementSpeed(){
 
-    if(currentSpeed > speedMin)
-      currentSpeed -= speedStep;
-
+    currentSpeed += speedStep;
+    if(currentSpeed > speedMax)
+    {
+      currentSpeed = speedMax;
+    }
     writeSpeed();
-    Serial.write("speed:");
-    Serial.println(currentSpeed, DEC);
+    movement();
+   // Serial.write("speed:");
+   // Serial.println(currentSpeed, DEC);
+}
+void incrementLuminous()
+{
+
+    luminous++;
+    if(luminous>255){
+      luminous=255;
+    }
+
+    writeLuminous();
+    setLuminous();
+  
+}
+void decrementLuminous()
+{
+
+    luminous--;
+    if(luminous<1)
+    {
+      luminous=1;
+    }
+    writeLuminous();
+    setLuminous();
+  
 }
 void writeSpeed()
 {
-  EEPROM.update(12, currentSpeed);
+  EEPROM.update(speedaddress, currentSpeed);
 }
 void writemoveMent()
 {
-  EEPROM.update(13, moveMent);
+  EEPROM.update(movementaddress, moveMent);
 }
-void loop() {
-
-  serialEvent(); //call the function
-  // print the string when a newline arrives:
-  if (stringComplete) {
-
-    inputString.trim();
-
-    uint32_t value = inputString.toInt();
-    
-    if(inputString != "4294967295"){
-      Serial.println(inputString);
-      handle(value);
-    }
-    
-    // clear the string:
-    //if(inputString=="553617527")
-    //  toggleState(0);
-      
-    inputString = "";
-    stringComplete = false;
-  }
-  //movement();
+void writeLuminous()
+{
+  EEPROM.update(luminousaddress, luminous);
 }
+
 /*
   SerialEvent occurs whenever a new data comes in the
  hardware serial RX.  This routine is run between each
@@ -211,57 +343,64 @@ void serialEvent() {
   }
   //stringComplete = true;
 }
-void incrementMovement()
-{
 
-  moveMent++;
-  moveMent = moveMent > 3 ? 0 : moveMent;
-
-  writemoveMent();
-  
-  Serial.write("moveMent:");
-  Serial.println(moveMent, DEC);
-}
 void movement()
 {
     
   if(moveMent > 0)
   {
-    Serial.write("moveMent:");
-    Serial.println(moveMent, DEC);
-    Serial.write("speed:");
-    Serial.println(currentSpeed, DEC);
-    Serial.write("port:");
-    if(moveMent == 1)
-    {
-      portIndex++;
-      portIndex = portIndex > 11 ? 0 : portIndex;
-    }
-    if(moveMent == 2)
-    {
-      portIndex--;
-      portIndex = portIndex < 0 ? 11 : portIndex;
-    }
     
-    delay(currentSpeed*100);
-  }
+    switch(moveMent)
+    {
+        default:
+        case 0:
+        break;
+        case 1:
+            // omhoog
+        break;
+        case 2:
+          states[portIndex] = LOW;
+          portIndex++;
+          portIndex = portIndex > 15 ? 0 : portIndex;   
+          states[portIndex] = HIGH;
+        break;
+        case 3:
+            // down
+        break;
+        case 4:
+          states[portIndex] = LOW;
+          portIndex--;
+          portIndex = portIndex < 0 ? 15 : portIndex;
+          states[portIndex] = HIGH;
+        break;      
+    }        
+    setLuminous();
+
+
+    delay(currentSpeed );
+    }
   
+}
+
+void resetAllSettings()
+{
+  moveMent = 0;// none
+  portIndex = 0;//
+  currentSpeed = speedMin;
+  writeStates();
 }
 void toggleState(int idx)
 {
 
-  if(idx < 12)
+  if(idx < 16)
   {
       states[idx] = states[idx] == HIGH ? LOW : HIGH;
       EEPROM.update(idx, states[idx]);
-      Tlc.set(idx, states[idx] == HIGH ? 4095 : 0);
+      Tlc.set(idx, states[idx] == HIGH ? currentLuminous : 0);
       Tlc.update();delay(75);
   }
-  else{
-      
-      
-  }
-  Serial.print("toggleState:");  Serial.println(idx);
+ 
+  //Serial.print("toggleState:");  Serial.println(idx);
 }
 
 void handle(uint32_t recv)
@@ -284,17 +423,17 @@ void handle(uint32_t recv)
         case  553597127:  toggleState(13);break; // exit
         case  553637927:  toggleState(14);break; // epg
         case  553629767:  toggleState(15);break; // i
-        case  553582847:  toggleState(16);break; // navUP
-        case  553599167:  toggleState(17);break; // navRight
-        case  553615487:  toggleState(18);break; // navDown
-        case  553631807:  toggleState(19);break; // nacLeft
-        case  553646087:  toggleState(20);break; // navOK
-        case  553642517:  toggleState(21);break; // V+
-        case  553589477:  toggleState(22);break; // V-
+        case  553582847:  moveMent = 1;writemoveMent();break; // navUP
+        case  553599167:  moveMent = 2;writemoveMent();break; // navRight
+        case  553615487:  moveMent = 3;writemoveMent();break; // navDown
+        case  553631807:  moveMent = 4;writemoveMent();break; // nacLeft
+        case  553646087:  resetAllSettings();break; // navOK
+        case  553642517:  incrementLuminous();break; // V+
+        case  553589477:  decrementLuminous();break; // V-
         case  553591007:  toggleState(23);break; // tel/muz
         case  553613957:  toggleState(24);break; // sat
-        case  553626197:  toggleState(25);break; // P+
-        case  553609877:  toggleState(26);break; // P-
+        case  553626197:  incrementSpeed();break; // P+
+        case  553609877:  decrementSpeed();break; // P-
         case  553635887:  toggleState(27);break; // F1
         case  553627727:  toggleState(28);break; // F2
         case  553611407:  toggleState(29);break; // F3
@@ -308,11 +447,11 @@ void handle(uint32_t recv)
         case  553583357:  toggleState(37);break; // M1
         case  553599677:  toggleState(38);break; // N/P
         case  553591517:  toggleState(39);break; // Timer
-        case  553603247:  toggleState(40);break; // POWER
-        case  553595087:  toggleState(41);break; // Mute
+        case  553603247:  togglePower();break; // POWER
+        case  553595087:  toggleState(0);break; // Mute
         default:
-            Serial.println(recv);   
-
+            //Serial.println(recv);   
+            break;
          }
          
 }
